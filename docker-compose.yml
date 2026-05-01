@@ -19,6 +19,21 @@ services:
         networks:
           - cicd-net
 
+    ldapadmin:
+        container_name: cicd-ldapadmin
+        image: osixia/phpldapadmin:latest
+        environment:
+          PHPLDAPADMIN_LDAP_HOSTS: ldap
+          PHPLDAPADMIN_HTTPS: false
+        volumes:
+          - ladpadmin_conf:/container/service/phpldapadmin
+        ports:
+          - "8080:80"
+        networks:
+          - cicd-net
+        depends_on:
+          - ldap
+
 # ── 네트워크 ──────────────────────────────────────────────────────────────────
 networks:
   cicd-net:
@@ -32,3 +47,4 @@ volumes:
   openldap_conf:
   openldap_data:
   openldap_backups:
+  ldapadmin_conf:
