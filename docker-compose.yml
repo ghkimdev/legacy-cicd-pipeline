@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+    ldap:
+        container_name: cicd-ldap
+        image: osixia/openldap:latest 
+        environment:
+          OPENLDAP_BOOTSTRAP_ORGANIZATION: "My Org"
+          OPENLDAP_BOOTSTRAP_SUFFIX: "dc=gwangho,dc=company,dc=org"
+          OPENLDAP_BOOTSTRAP_ROOT_DN: "cn=admin,${OPENLDAP_BOOTSTRAP_SUFFIX}"
+        volumes:
+          - openldap_conf:/etc/openldap/slapd.d
+          - openldap_data:/var/lib/openldap/openldap-data
+          - openldap_backups:/var/lib/openldap/openldap-backups
+        ports:
+          - "389:389"
+          - "636:636"
+        command: --copy-service
+        networks:
+          - cicd-net
+
+# ── 네트워크 ──────────────────────────────────────────────────────────────────
+networks:
+  cicd-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+# ── 볼륨 ──────────────────────────────────────────────────────────────────────
+volumes:
+  openldap_conf:
+  openldap_data:
+  openldap_backups:
