@@ -5,9 +5,9 @@ services:
         container_name: cicd-ldap
         image: osixia/openldap:latest 
         environment:
-          OPENLDAP_BOOTSTRAP_ORGANIZATION: "My Org"
-          OPENLDAP_BOOTSTRAP_SUFFIX: "dc=gwangho,dc=company,dc=org"
-          OPENLDAP_BOOTSTRAP_ROOT_DN: "cn=admin,${OPENLDAP_BOOTSTRAP_SUFFIX}"
+          LDAP_ORGANISATION: "Gwangho Corp"
+          LDAP_DOMAIN: "gwangho.com"
+          LDAP_ADMIN_PASSWORD: "admin"
         volumes:
           - openldap_conf:/etc/openldap/slapd.d
           - openldap_data:/var/lib/openldap/openldap-data
