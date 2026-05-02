@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+    jenkins:
+        image: jenkins/jenkins:latest
+        container_name: cicd-jenkins
+        restart: unless-stopped
+        ports:
+          - "18080:8080"
+          - "50000:50000"
+        volumes:
+          - jenkins_home:/var/jenkins_home
+        networks:
+          - cicd-net
     ldap:
         container_name: cicd-ldap
         image: osixia/openldap:latest 
@@ -50,6 +61,7 @@ networks:
 
 # ── 볼륨 ──────────────────────────────────────────────────────────────────────
 volumes:
+  jenkins_home:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:
