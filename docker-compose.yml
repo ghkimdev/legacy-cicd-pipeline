@@ -12,6 +12,20 @@ services:
           - jenkins_home:/var/jenkins_home
         networks:
           - cicd-net
+
+    nexus:
+        image: sonatype/nexus3:latest
+        container_name: cicd-nexus
+        restart: unless-stopped
+        environment:
+            INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m"
+        ports:
+          - "18081:8081"
+        volumes:
+          - nexus_data:/nexus-data
+        networks:
+          - cicd-net
+
     ldap:
         container_name: cicd-ldap
         image: osixia/openldap:latest 
@@ -62,6 +76,7 @@ networks:
 # ── 볼륨 ──────────────────────────────────────────────────────────────────────
 volumes:
   jenkins_home:
+  nexus_data:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:
