@@ -26,6 +26,17 @@ services:
         networks:
           - cicd-net
 
+    rundeck:
+        image: ${RUNDECK_IMAGE:-rundeck/rundeck:5.20.0}
+        container_name: cicd-rundeck
+        restart: unless-stopped
+        ports:
+          - "14440:4440"
+        volumes:
+          - rundeck_data:/home/rundeck/server/data
+        networks:
+          - cicd-net
+
     ldap:
         container_name: cicd-ldap
         image: osixia/openldap:latest 
@@ -77,6 +88,7 @@ networks:
 volumes:
   jenkins_home:
   nexus_data:
+  rundeck_data:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:
