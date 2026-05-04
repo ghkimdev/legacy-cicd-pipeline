@@ -1,8 +1,29 @@
 version: '3'
 
 services:
+    nginx:
+        image: nginx:latest
+        container_name: cicd-nginx
+        restart: unless-stopped
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - ./nginx/conf.d:/etc/nginx/conf.d
+          - ./nginx/certs:/etc/nginx/certs
+        depends_on:
+          - jenkins
+          - nexus
+          - rundeck
+        networks:
+          - cicd-net
+
     jenkins:
-        image: jenkins/jenkins:latest
+#        image: jenkins/jenkins:latest
+        build:
+            context: ./jenkins
+            dockerfile: docker/Dockerfile
+        hostname: jenkins.example.com
         container_name: cicd-jenkins
         restart: unless-stopped
         ports:
@@ -14,7 +35,11 @@ services:
           - cicd-net
 
     nexus:
-        image: sonatype/nexus3:latest
+#        image: sonatype/nexus3:latest
+        build:
+            context: ./nexus
+            dockerfile: docker/Dockerfile
+        hostname: nexus.example.com
         container_name: cicd-nexus
         restart: unless-stopped
         environment:
@@ -27,7 +52,11 @@ services:
           - cicd-net
 
     rundeck:
-        image: ${RUNDECK_IMAGE:-rundeck/rundeck:5.20.0}
+#        image: rundeck/rundeck:5.20.0
+        build:
+            context: ./rundeck
+            dockerfile: docker/Dockerfile
+        hostname: rundeck.example.com
         container_name: cicd-rundeck
         restart: unless-stopped
         ports:
