@@ -15,27 +15,23 @@ services:
           - jenkins
           - nexus
           - rundeck
+          - svn
         networks:
           - cicd-net
 
     jenkins:
-#        image: jenkins/jenkins:latest
         build:
             context: ./jenkins
             dockerfile: docker/Dockerfile
         hostname: jenkins.example.com
         container_name: cicd-jenkins
         restart: unless-stopped
-        ports:
-          - "18080:8080"
-          - "50000:50000"
         volumes:
           - jenkins_home:/var/jenkins_home
         networks:
           - cicd-net
 
     nexus:
-#        image: sonatype/nexus3:latest
         build:
             context: ./nexus
             dockerfile: docker/Dockerfile
@@ -44,25 +40,34 @@ services:
         restart: unless-stopped
         environment:
             INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m"
-        ports:
-          - "18081:8081"
         volumes:
           - nexus_data:/nexus-data
         networks:
           - cicd-net
 
     rundeck:
-#        image: rundeck/rundeck:5.20.0
         build:
             context: ./rundeck
             dockerfile: docker/Dockerfile
         hostname: rundeck.example.com
         container_name: cicd-rundeck
         restart: unless-stopped
-        ports:
-          - "14440:4440"
         volumes:
           - rundeck_data:/home/rundeck/server/data
+        networks:
+          - cicd-net
+
+    svn:
+        build: 
+            context: ./svn
+            dockerfile: docker/Dockerfile
+        hostname: svn.example.com
+        container_name: cicd-svn
+        restart: unless-stopped
+        depends_on:
+          - ldap
+        volumes:
+          - ./repos:/var/svn/repos
         networks:
           - cicd-net
 
@@ -118,6 +123,7 @@ volumes:
   jenkins_home:
   nexus_data:
   rundeck_data:
+  svn_home:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:
