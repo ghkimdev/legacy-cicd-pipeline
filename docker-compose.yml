@@ -98,7 +98,7 @@ services:
           - ldap_conf:/container/service/slapd
           - ldap_data:/var/lib/ldap
           - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
-          - ./certs/ldap:/container/service/slapd/assets/certs
+          - ./ldap/certs:/container/service/slapd/assets/certs
         ports:
           - "389:389"
           - "636:636"
