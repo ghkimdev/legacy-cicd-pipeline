@@ -11,11 +11,6 @@ services:
         volumes:
           - ./nginx/conf.d:/etc/nginx/conf.d
           - ./nginx/certs:/etc/nginx/certs
-        depends_on:
-          - jenkins
-          - nexus
-          - rundeck
-          - svn
         networks:
           - cicd-net
 
@@ -30,6 +25,8 @@ services:
           - jenkins_home:/var/jenkins_home
         networks:
           - cicd-net
+        depends_on:
+          - ldap
 
     nexus:
         build:
@@ -44,6 +41,8 @@ services:
           - nexus_data:/nexus-data
         networks:
           - cicd-net
+        depends_on:
+          - ldap
 
     rundeck:
         build:
@@ -52,10 +51,22 @@ services:
         hostname: rundeck.example.com
         container_name: cicd-rundeck
         restart: unless-stopped
+        environment:
+            RUNDECK_GRAILS_URL: https://rundeck.example.com
+            RUNDECK_SERVER_FORWARDED: "true"
+            RUNDECK_JAAS_MODULES_0: JettyCombinedLdapLoginModule
+            RUNDECK_JAAS_LDAP_PROVIDERURL: ldaps://ldap:636
+            RUNDECK_JAAS_LDAP_BINDDN: cn=admin,dc=example,dc=com
+            RUNDECK_JAAS_LDAP_BINDPASSWORD: AdminPass123
+            RUNDECK_JAAS_LDAP_USERBASEDN: ou=users,dc=example,dc=com
+            RUNDECK_JAAS_LDAP_ROLEBASEDN: ou=roles,dc=example,dc=com
+
         volumes:
           - rundeck_data:/home/rundeck/server/data
         networks:
           - cicd-net
+        depends_on:
+          - ldap
 
     svn:
         build: 
@@ -64,12 +75,12 @@ services:
         hostname: svn.example.com
         container_name: cicd-svn
         restart: unless-stopped
-        depends_on:
-          - ldap
         volumes:
           - ./repos:/var/svn/repos
         networks:
           - cicd-net
+        depends_on:
+          - ldap
 
     ldap:
         container_name: cicd-ldap
@@ -77,7 +88,7 @@ services:
         environment:
           LDAP_ORGANISATION: "Example Corp"
           LDAP_DOMAIN: "example.com"
-          LDAP_ADMIN_PASSWORD: "admin"
+          LDAP_ADMIN_PASSWORD: "AdminPass123"
           LDAP_TLS: "true"
           LDAP_TLS_CRT_FILENAME: "ldap.crt"
           LDAP_TLS_KEY_FILENAME: "ldap.key"
@@ -123,7 +134,7 @@ volumes:
   jenkins_home:
   nexus_data:
   rundeck_data:
-  svn_home:
+  svn_repos:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:

@@ -1,30 +1,50 @@
-dn: ou=users,dc=example,dc=com
+# Define top-level entry:
+#dn: {{ LDAP_BASE_DN }}
+#objectClass: dcObject
+#objectClass: organization
+#o: Example, Inc.
+#dc: example
+
+# Define an entry to contain users:
+dn: ou=users,{{ LDAP_BASE_DN }}
 objectClass: organizationalUnit
-ou: people
+ou: users
 
-dn: ou=groups,dc=example,dc=com
-objectClass: organizationalUnit
-ou: groups
-
-dn: uid=user1,ou=users,dc=example,dc=com
+# Define some users:
+dn: cn=admin, ou=users,{{ LDAP_BASE_DN }}
+uid: admin
+userPassword: admin
+objectClass: person
+objectClass: top
 objectClass: inetOrgPerson
-cn: User One
-sn: One
-uid: user1
-mail: user1@example.org
-userPassword: {SSHA}vbz4Qcu+uY7LlqY/94fMXZMCjPB3prlO
+sn: The admin account for the Example client to use
+cn: admin
 
-dn: uid=user2,ou=users,dc=example,dc=com
+dn: cn=build, ou=users,{{ LDAP_BASE_DN }}
+uid: build
+userPassword: {MD5}sNonVSCRjiPdYV4qdHUo8Q==
+#####
+# MD5 creds, Base64 encoded
+#userPassword: build
+objectClass: person
+objectClass: top
 objectClass: inetOrgPerson
-cn: User Two
-sn: Two
-uid: user2
-mail: user2@example.org
-userPassword: {SSHA}vbz4Qcu+uY7LlqY/94fMXZMCjPB3prlO
+sn: The account to use to demonstrate managing builds only
+cn: build
 
-dn: cn=devops,ou=groups,dc=example,dc=com
-objectClass: groupOfNames
-cn: devops
-member: uid=user1,ou=users,dc=example,dc=com
-member: uid=user2,ou=users,dc=example,dc=com
+dn: cn=deploy, ou=users,{{ LDAP_BASE_DN }}
+uid: deploy
+userPassword: {CRYPT}de01JmlU8XXTQ
+#####
+# CRYPT creds
+#userPassword: deploy
+objectClass: person
+objectClass: top
+objectClass: inetOrgPerson
+sn: The account to use to demonstrate managing deployment only
+cn: deploy
 
+dn: cn=test, ou=users,{{ LDAP_BASE_DN }}
+uid: test
+userPassword: test
+objectClass: person
