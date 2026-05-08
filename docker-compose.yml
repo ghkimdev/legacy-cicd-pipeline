@@ -60,7 +60,6 @@ services:
             RUNDECK_JAAS_LDAP_BINDPASSWORD: AdminPass123
             RUNDECK_JAAS_LDAP_USERBASEDN: ou=users,dc=example,dc=com
             RUNDECK_JAAS_LDAP_ROLEBASEDN: ou=roles,dc=example,dc=com
-
         volumes:
           - rundeck_data:/home/rundeck/server/data
         networks:
@@ -121,6 +120,20 @@ services:
         depends_on:
           - ldap
 
+    mailhog:
+        container_name: mailhog
+        image: mailhog/mailhog
+        volumes:
+          - mailhog_data:/data
+        ports:
+          - "1025:1025"
+          - "8025:8025"
+        networks:
+          - cicd-net
+
+volumes:
+  mailhog_data:
+
 # ── 네트워크 ──────────────────────────────────────────────────────────────────
 networks:
   cicd-net:
@@ -138,3 +151,4 @@ volumes:
   ldap_conf:
   ldap_data:
   ldapadmin_conf:
+  mailhog_data:
