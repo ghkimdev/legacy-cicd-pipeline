@@ -36,7 +36,7 @@ services:
     container_name: nexus
     restart: unless-stopped
     environment:
-      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m"
+      INSTALL4J_ADD_VM_PARAMS: ${INSTALL4J_ADD_VM_PARAMS}
     volumes:
       - nexus_data:/nexus-data
     networks:
@@ -52,14 +52,14 @@ services:
     container_name: rundeck
     restart: unless-stopped
     environment:
-      RUNDECK_GRAILS_URL: https://rundeck.example.com
+      RUNDECK_GRAILS_URL: ${RUNDECK_GRAILS_URL}
       RUNDECK_SERVER_FORWARDED: "true"
       RUNDECK_JAAS_MODULES_0: JettyCombinedLdapLoginModule
-      RUNDECK_JAAS_LDAP_PROVIDERURL: ldaps://ldap:636
-      RUNDECK_JAAS_LDAP_BINDDN: cn=admin,dc=example,dc=com
-      RUNDECK_JAAS_LDAP_BINDPASSWORD: AdminPass123
-      RUNDECK_JAAS_LDAP_USERBASEDN: ou=users,dc=example,dc=com
-      RUNDECK_JAAS_LDAP_ROLEBASEDN: ou=roles,dc=example,dc=com
+      RUNDECK_JAAS_LDAP_PROVIDERURL: ldaps://${LDAP_HOST}:${LDAPS_PORT}
+      RUNDECK_JAAS_LDAP_BINDDN: ${LDAP_BIND_DN}
+      RUNDECK_JAAS_LDAP_BINDPASSWORD: ${LDAP_ADMIN_PASSWORD}
+      RUNDECK_JAAS_LDAP_USERBASEDN: ${LDAP_USER_BASE},${LDAP_BASE_DN}
+      RUNDECK_JAAS_LDAP_ROLEBASEDN: ${LDAP_ROLE_BASE},${LDAP_BASE_DN}
     volumes:
       - rundeck_data:/home/rundeck/server/data
     networks:
@@ -85,14 +85,14 @@ services:
     container_name: ldap
     image: osixia/openldap:1.5.0
     environment:
-      LDAP_ORGANISATION: "Example Corp"
-      LDAP_DOMAIN: "example.com"
-      LDAP_ADMIN_PASSWORD: "AdminPass123"
-      LDAP_TLS: "true"
-      LDAP_TLS_CRT_FILENAME: "ldap.crt"
-      LDAP_TLS_KEY_FILENAME: "ldap.key"
-      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
-      LDAP_TLS_VERIFY_CLIENT: "never"
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_TLS: true
+      LDAP_TLS_CRT_FILENAME: ${LDAP_TLS_CRT_FILENAME}
+      LDAP_TLS_KEY_FILENAME: ${LDAP_TLS_KEY_FILENAME}
+      LDAP_TLS_CA_CRT_FILENAME: ${LDAP_TLS_CA_CRT_FILENAME}
+      LDAP_TLS_VERIFY_CLIENT: never
     volumes:
       - ldap_conf:/container/service/slapd
       - ldap_data:/var/lib/ldap
