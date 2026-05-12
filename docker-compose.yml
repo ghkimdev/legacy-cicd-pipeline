@@ -1,138 +1,145 @@
-version: '3'
-
 services:
-    nginx:
-        image: nginx:latest
-        container_name: cicd-nginx
-        restart: unless-stopped
-        ports:
-          - "80:80"
-          - "443:443"
-        volumes:
-          - ./nginx/conf.d:/etc/nginx/conf.d
-          - ./nginx/certs:/etc/nginx/certs
-        networks:
-          - cicd-net
+  nginx:
+    image: nginx:latest
+    container_name: cicd-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+    networks:
+      - cicd-net
+    depends_on:
+      - jenkins
+        
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: docker/Dockerfile
+    hostname: jenkins.example.com
+    container_name: cicd-jenkins
+    restart: unless-stopped
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - cicd-net
+    depends_on:
+      - ldap
 
-    jenkins:
-        build:
-            context: ./jenkins
-            dockerfile: docker/Dockerfile
-        hostname: jenkins.example.com
-        container_name: cicd-jenkins
-        restart: unless-stopped
-        volumes:
-          - jenkins_home:/var/jenkins_home
-        networks:
-          - cicd-net
-        depends_on:
-          - ldap
+  nexus:
+    build:
+      context: ./nexus
+      dockerfile: docker/Dockerfile
+    hostname: nexus.example.com
+    container_name: cicd-nexus
+    restart: unless-stopped
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m"
+    volumes:
+      - nexus_data:/nexus-data
+    networks:
+      - cicd-net
+    depends_on:
+      - ldap
 
-    nexus:
-        build:
-            context: ./nexus
-            dockerfile: docker/Dockerfile
-        hostname: nexus.example.com
-        container_name: cicd-nexus
-        restart: unless-stopped
-        environment:
-            INSTALL4J_ADD_VM_PARAMS: "-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m"
-        volumes:
-          - nexus_data:/nexus-data
-        networks:
-          - cicd-net
-        depends_on:
-          - ldap
+  rundeck:
+    build:
+      context: ./rundeck
+      dockerfile: docker/Dockerfile
+    hostname: rundeck.example.com
+    container_name: cicd-rundeck
+    restart: unless-stopped
+    environment:
+      RUNDECK_GRAILS_URL: https://rundeck.example.com
+      RUNDECK_SERVER_FORWARDED: "true"
+      RUNDECK_JAAS_MODULES_0: JettyCombinedLdapLoginModule
+      RUNDECK_JAAS_LDAP_PROVIDERURL: ldaps://ldap:636
+      RUNDECK_JAAS_LDAP_BINDDN: cn=admin,dc=example,dc=com
+      RUNDECK_JAAS_LDAP_BINDPASSWORD: AdminPass123
+      RUNDECK_JAAS_LDAP_USERBASEDN: ou=users,dc=example,dc=com
+      RUNDECK_JAAS_LDAP_ROLEBASEDN: ou=roles,dc=example,dc=com
+    volumes:
+      - rundeck_data:/home/rundeck/server/data
+    networks:
+      - cicd-net
+    depends_on:
+      - ldap
 
-    rundeck:
-        build:
-            context: ./rundeck
-            dockerfile: docker/Dockerfile
-        hostname: rundeck.example.com
-        container_name: cicd-rundeck
-        restart: unless-stopped
-        environment:
-            RUNDECK_GRAILS_URL: https://rundeck.example.com
-            RUNDECK_SERVER_FORWARDED: "true"
-            RUNDECK_JAAS_MODULES_0: JettyCombinedLdapLoginModule
-            RUNDECK_JAAS_LDAP_PROVIDERURL: ldaps://ldap:636
-            RUNDECK_JAAS_LDAP_BINDDN: cn=admin,dc=example,dc=com
-            RUNDECK_JAAS_LDAP_BINDPASSWORD: AdminPass123
-            RUNDECK_JAAS_LDAP_USERBASEDN: ou=users,dc=example,dc=com
-            RUNDECK_JAAS_LDAP_ROLEBASEDN: ou=roles,dc=example,dc=com
-        volumes:
-          - rundeck_data:/home/rundeck/server/data
-        networks:
-          - cicd-net
-        depends_on:
-          - ldap
+  svn:
+    build: 
+      context: ./svn
+      dockerfile: docker/Dockerfile
+    hostname: svn.example.com
+    container_name: cicd-svn
+    restart: unless-stopped
+    volumes:
+      - ./repos:/var/svn/repos
+    networks:
+      - cicd-net
+    depends_on:
+      - ldap
 
-    svn:
-        build: 
-            context: ./svn
-            dockerfile: docker/Dockerfile
-        hostname: svn.example.com
-        container_name: cicd-svn
-        restart: unless-stopped
-        volumes:
-          - ./repos:/var/svn/repos
-        networks:
-          - cicd-net
-        depends_on:
-          - ldap
+  ldap:
+    container_name: cicd-ldap
+    image: osixia/openldap:latest 
+    environment:
+      LDAP_ORGANISATION: "Example Corp"
+      LDAP_DOMAIN: "example.com"
+      LDAP_ADMIN_PASSWORD: "AdminPass123"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_VERIFY_CLIENT: "never"
+    volumes:
+      - ldap_conf:/container/service/slapd
+      - ldap_data:/var/lib/ldap
+      - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      - ./ldap/certs:/container/service/slapd/assets/certs
+    ports:
+      - "389:389"
+      - "636:636"
+    command: --copy-service
+    networks:
+      - cicd-net
 
-    ldap:
-        container_name: cicd-ldap
-        image: osixia/openldap:latest 
-        environment:
-          LDAP_ORGANISATION: "Example Corp"
-          LDAP_DOMAIN: "example.com"
-          LDAP_ADMIN_PASSWORD: "AdminPass123"
-          LDAP_TLS: "true"
-          LDAP_TLS_CRT_FILENAME: "ldap.crt"
-          LDAP_TLS_KEY_FILENAME: "ldap.key"
-          LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
-          LDAP_TLS_VERIFY_CLIENT: "never"
-        volumes:
-          - ldap_conf:/container/service/slapd
-          - ldap_data:/var/lib/ldap
-          - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
-          - ./ldap/certs:/container/service/slapd/assets/certs
-        ports:
-          - "389:389"
-          - "636:636"
-        command: --copy-service
-        networks:
-          - cicd-net
+  ldapadmin:
+    container_name: cicd-ldapadmin
+    image: osixia/phpldapadmin:latest
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_HTTPS: false
+    volumes:
+      - ldapadmin_conf:/container/service/phpldapadmin
+    ports:
+      - "8080:80"
+    networks:
+      - cicd-net
+    depends_on:
+      - ldap
 
-    ldapadmin:
-        container_name: cicd-ldapadmin
-        image: osixia/phpldapadmin:latest
-        environment:
-          PHPLDAPADMIN_LDAP_HOSTS: ldap
-          PHPLDAPADMIN_HTTPS: false
-        volumes:
-          - ldapadmin_conf:/container/service/phpldapadmin
-        ports:
-          - "8080:80"
-        networks:
-          - cicd-net
-        depends_on:
-          - ldap
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    volumes:
+      - mailhog_data:/data
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - cicd-net
 
-    mailhog:
-        container_name: mailhog
-        image: mailhog/mailhog
-        volumes:
-          - mailhog_data:/data
-        ports:
-          - "1025:1025"
-          - "8025:8025"
-        networks:
-          - cicd-net
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
+    restart: unless-stopped
+    networks:
+      - cicd-net
 
-volumes:
-  mailhog_data:
 
 # ── 네트워크 ──────────────────────────────────────────────────────────────────
 networks:
