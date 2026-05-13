@@ -16,5 +16,15 @@ RUN keytool -importcert -noprompt \
   -keystore $JAVA_HOME/lib/security/cacerts \
   -storepass changeit
 
-# 4. 권한 복구
+# 4. Jenkins 플러그인 설치
+COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
+
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
+
+# 5. 권한 복구
 USER jenkins
+
+# 6. Jenkins - LDAP 연동
+COPY casc/jenkins.yaml /var/jenkins_home/casc_configs/jenkins.yaml
+
+ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/jenkins.yaml

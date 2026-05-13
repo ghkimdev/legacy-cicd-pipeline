@@ -7,9 +7,9 @@
     AuthName "SVN Repository"
 
     AuthBasicProvider ldap
-    AuthLDAPURL "${LDAP_URL}"
+    AuthLDAPURL "${LDAP_AUTH_URL}"
     AuthLDAPBindDN "${LDAP_BIND_DN}"
-    AuthLDAPBindPassword "${LDAP_ADMIN_PASSWORD}"
+    AuthLDAPBindPassword "${LDAP_BIND_PASSWORD}"
 
     Require valid-user
 </Location>
