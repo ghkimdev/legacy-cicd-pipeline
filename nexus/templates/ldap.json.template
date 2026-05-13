@@ -1,0 +1,36 @@
+{
+  "name": "LDAP",
+
+  "protocol": "ldaps",
+  "host": "${LDAP_HOST}",
+  "port": ${LDAPS_PORT},
+
+  "searchBase": "${LDAP_BASE_DN}",
+
+  "authScheme": "simple",
+  "authUsername": "${LDAP_BIND_DN}",
+  "authPassword": "${LDAP_BIND_PASSWORD}",
+
+  "connectionTimeoutSeconds": 30,
+  "connectionRetryDelaySeconds": 300,
+  "maxIncidentsCount": 3,
+
+  "userBaseDn": "${LDAP_USER_BASE}",
+  "userSubtree": true,
+  "userObjectClass": "inetOrgPerson",
+
+  "userIdAttribute": "uid",
+  "userRealNameAttribute": "cn",
+  "userEmailAddressAttribute": "mail",
+
+  "ldapGroupsAsRoles": true,
+
+  "groupType": "static",
+  "groupBaseDn": "${LDAP_ROLE_BASE}",
+  "groupSubtree": true,
+
+  "groupObjectClass": "groupOfNames",
+  "groupIdAttribute": "cn",
+  "groupMemberAttribute": "member",
+  "groupMemberFormat": "uid=${username},${LDAP_USER_BASE},${LDAP_BASE_DN}"
+}

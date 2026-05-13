@@ -21,8 +21,6 @@ services:
     hostname: jenkins.example.com
     container_name: jenkins
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       LDAP_URL: ${LDAP_URL}
       LDAP_DOMAIN: ${LDAP_DOMAIN}
@@ -50,6 +48,25 @@ services:
       - cicd-net
     depends_on:
       - ldap
+
+  nexus-init:
+    image: alpine:3.23
+    env_file:
+      - .env
+    entrypoint: >
+      sh -c "
+        apk add --no-cache curl jq gettext &&
+        chmod +x /scripts/*.sh &&
+        /scripts/provision.sh
+      "
+    volumes:
+      - ./nexus/scripts:/scripts
+      - ./nexus/templates:/templates
+      - nexus_data:/nexus-data
+    networks:
+      - cicd-net
+    depends_on:
+      - nexus
 
   rundeck:
     build:

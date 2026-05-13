@@ -16,5 +16,10 @@ RUN keytool -importcert -noprompt \
   -keystore /usr/lib/jvm/java-25-openjdk/lib/security/cacerts \
   -storepass changeit
 
-# 4. 권한 복구
+# 4. 프로비저닝 스크립트 추가
+COPY scripts /opt/nexus/scripts
+
+RUN chmod +x /opt/nexus/scripts/*.sh
+
+# 5. 권한 복구
 USER nexus
