@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Jenkins 에서 사용할 Maven settings.xml.
+  Jenkins Credentials 에 nexus-user/nexus-pass 등록 후
+  withCredentials 로 환경변수 주입 → 이 파일이 ${nexus.user}/${nexus.pass} 를 치환.
+-->
+<settings>
+    <servers>
+        <server>
+            <id>nexus-releases</id>
+            <username>${env.NEXUS_USER}</username>
+            <password>${env.NEXUS_PASS}</password>
+        </server>
+        <server>
+            <id>nexus-snapshots</id>
+            <username>${env.NEXUS_USER}</username>
+            <password>${env.NEXUS_PASS}</password>
+        </server>
+    </servers>
+
+    <mirrors>
+        <!-- 모든 외부 maven 요청을 Nexus proxy 로 -->
+        <mirror>
+            <id>nexus-public</id>
+            <mirrorOf>*</mirrorOf>
+            <url>http://nexus.example.com/repository/maven-public/</url>
+        </mirror>
+    </mirrors>
+</settings>

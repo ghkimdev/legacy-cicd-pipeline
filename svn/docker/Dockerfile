@@ -17,8 +17,9 @@ RUN a2enmod dav dav_svn ldap authnz_ldap
 COPY conf/svn.conf.template /etc/apache2/conf-enabled/svn.conf.template
 COPY conf/svn-authz.conf /etc/apache2/svn-authz.conf
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/init-svn.sh /init-svn.sh
+RUN chmod +x /entrypoint.sh /init-svn.sh
 
 RUN mkdir -p /var/svn/repos
 
