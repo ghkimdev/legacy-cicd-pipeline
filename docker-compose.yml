@@ -21,11 +21,8 @@ services:
     hostname: jenkins.example.com
     container_name: jenkins
     restart: unless-stopped
-    environment:
-      LDAP_URL: ${LDAP_URL}
-      LDAP_DOMAIN: ${LDAP_DOMAIN}
-      LDAP_BIND_DN: ${LDAP_BIND_DN}
-      LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - jenkins_home:/var/jenkins_home
     networks:
@@ -40,6 +37,8 @@ services:
     hostname: nexus.example.com
     container_name: nexus
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       INSTALL4J_ADD_VM_PARAMS: ${INSTALL4J_ADD_VM_PARAMS}
     volumes:
