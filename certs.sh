@@ -36,6 +36,12 @@ echo ""
 # 1. 디렉토리 구조 생성
 # ============================================
 echo -e "${YELLOW}[1/12] 디렉토리 구조 생성...${NC}"
+rm -rf nginx/certs
+rm -rf ldap/certs
+rm -rf jenkins/certs
+rm -rf rundeck/certs
+rm -rf nexus/certs
+rm -rf svn/certs
 mkdir -p nginx/certs/{ldap,jenkins,rundeck,nexus,svn}
 mkdir -p ldap/certs
 mkdir -p jenkins/certs
@@ -94,7 +100,8 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = ${NAME}
 DNS.2 = ${NAME}.${DOMAIN}
-DNS.3 = localhost
+DNS.3 = *.${NAME}.${DOMAIN}
+DNS.4 = localhost
 IP.1 = 127.0.0.1
 EOF
 
